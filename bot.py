@@ -1,4 +1,5 @@
 import csv
+import html
 import json
 import os
 import random
@@ -14,10 +15,16 @@ def main():
         rows = list(csv.DictReader(f, delimiter=";"))
 
     row = random.choice(rows)
-    text = f"🇪🇸 {row['es']}\n🇷🇺 {row['ru']}"
+    es = html.escape(row["es"])
+    ru = html.escape(row["ru"])
+    text = f"🇪🇸 <tg-spoiler>{es}</tg-spoiler>\n🇷🇺 {ru}"
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    data = urllib.parse.urlencode({"chat_id": chat_id, "text": text}).encode()
+    data = urllib.parse.urlencode({
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML",
+    }).encode()
     with urllib.request.urlopen(urllib.request.Request(url, data=data)) as resp:
         json.load(resp)
 
