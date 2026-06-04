@@ -425,7 +425,6 @@ select {
 
 .task span {
   flex: 1;
-  word-break: break-word;
 }
 
 .week-grid-wrap {
