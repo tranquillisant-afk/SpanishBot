@@ -168,8 +168,8 @@ select {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--ink);
-  width: 9ch;
-  max-width: 40vw;
+  min-width: 4ch;
+  max-width: 60vw;
 }
 
 .week-switch {

@@ -30,6 +30,7 @@ export default function Header({
           <input
             className="name-input"
             value={state.userName}
+            size={Math.max(4, state.userName.length)}
             onChange={(e) => setState((s) => ({ ...s, userName: e.target.value }))}
             aria-label="Ваше имя"
           />
