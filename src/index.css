@@ -428,16 +428,15 @@ select {
   word-break: break-word;
 }
 
-.week-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
+.week-grid-wrap {
+  overflow-x: auto;
 }
 
-@media (max-width: 720px) {
-  .week-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(160px, 1fr));
+  gap: 10px;
+  min-width: 1120px;
 }
 
 .checkbox {

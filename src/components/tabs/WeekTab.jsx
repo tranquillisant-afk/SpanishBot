@@ -92,7 +92,7 @@ export default function WeekTab({ state, setState, weekKey, onPickDate }) {
 
       <div className="card">
         <h2>✅ Задачи недели</h2>
-        <div className="week-grid">
+        <div className="week-grid-wrap"><div className="week-grid">
           {days.map((date, di) => (
             <DayTaskColumn
               key={di}
@@ -103,7 +103,7 @@ export default function WeekTab({ state, setState, weekKey, onPickDate }) {
               setState={setState}
             />
           ))}
-        </div>
+        </div></div>
       </div>
 
       <div className="card">
