@@ -125,7 +125,8 @@ function HabitsCard({ state, setState, weekKey }) {
 function BarInputCard({ title, emoji, weekKey, week, setState, field, goal, unit, hint, goalLabel }) {
   const days = weekDays(weekKey)
   const values = days.map((_, di) => week[field][di] ?? '')
-  const max = Math.max(goal, ...values.map((v) => Number(v) || 0)) || goal
+  const goalNum = Array.isArray(goal) ? goal[1] : goal
+  const max = Math.max(goalNum, ...values.map((v) => Number(v) || 0)) || goalNum
 
   const setVal = (di, val) =>
     setState(updateWeek(weekKey, (w) => ({ ...w, [field]: { ...w[field], [di]: val } })))
@@ -135,7 +136,6 @@ function BarInputCard({ title, emoji, weekKey, week, setState, field, goal, unit
     if (Array.isArray(goal)) return n >= goal[0] && n <= goal[1]
     return n >= goal
   }
-  const goalNum = Array.isArray(goal) ? goal[1] : goal
 
   return (
     <div className="card">

@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { weekDays, dayNames, monthGrid, fromKey, toKey, isToday } from '../../lib/dates'
+import { weekDays, dayNames, monthGrid, fromKey, toKey, isToday, fullDateLabel } from '../../lib/dates'
 import { getWeek } from '../../lib/defaultState'
 import { updateWeek, uid } from '../../lib/updaters'
 
-function MiniCalendar({ weekKey, onPickDate, events }) {
+function MiniCalendar({ weekKey, onSelectDay, selectedDay, events }) {
   const monday = fromKey(weekKey)
   const [view, setView] = useState({ y: monday.getFullYear(), m: monday.getMonth() })
   const weeks = monthGrid(view.y, view.m)
@@ -44,15 +44,64 @@ function MiniCalendar({ weekKey, onPickDate, events }) {
             weekSet.has(key) ? 'in-week' : '',
             isToday(cell) ? 'today' : '',
             eventDates.has(key) ? 'has-event' : '',
+            selectedDay === key ? 'selected' : '',
           ]
             .filter(Boolean)
             .join(' ')
           return (
-            <button key={i} className={cls} onClick={() => onPickDate(cell)}>
+            <button key={i} className={cls} onClick={() => onSelectDay(key)}>
               {cell.getDate()}
             </button>
           )
         })}
+      </div>
+      <p className="muted" style={{ marginTop: 8 }}>
+        Нажмите на день, чтобы добавить событие.
+      </p>
+    </div>
+  )
+}
+
+function EventsPanel({ dateKey, state, setState, onOpenDay }) {
+  const [name, setName] = useState('')
+  const dayEvents = state.events.filter((e) => e.date === dateKey)
+
+  const add = () => {
+    const t = name.trim()
+    if (!t) return
+    setState((s) => ({ ...s, events: [...s.events, { id: uid('e'), name: t, date: dateKey }] }))
+    setName('')
+  }
+  const remove = (id) => setState((s) => ({ ...s, events: s.events.filter((e) => e.id !== id) }))
+
+  return (
+    <div className="events-panel">
+      <div className="row" style={{ marginBottom: 8 }}>
+        <strong style={{ flex: 1 }}>📌 {fullDateLabel(fromKey(dateKey))}</strong>
+        <button className="btn sm ghost" onClick={() => onOpenDay(fromKey(dateKey))}>
+          открыть день →
+        </button>
+      </div>
+      {dayEvents.length === 0 && <div className="muted" style={{ marginBottom: 6 }}>Событий пока нет.</div>}
+      {dayEvents.map((e) => (
+        <div className="event-row" key={e.id}>
+          <span>🔖 {e.name}</span>
+          <button className="icon-x" onClick={() => remove(e.id)}>
+            ✕
+          </button>
+        </div>
+      ))}
+      <div className="add-row">
+        <input
+          className="input"
+          placeholder="Название события…"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && add()}
+        />
+        <button className="btn primary" onClick={add}>
+          +
+        </button>
       </div>
     </div>
   )
@@ -61,11 +110,18 @@ function MiniCalendar({ weekKey, onPickDate, events }) {
 export default function WeekTab({ state, setState, weekKey, onPickDate }) {
   const week = getWeek(state, weekKey)
   const days = weekDays(weekKey)
+  const [eventDay, setEventDay] = useState(null)
 
   const setPriority = (i, val) =>
     setState(updateWeek(weekKey, (w) => ({ ...w, priorities: w.priorities.map((p, idx) => (idx === i ? val : p)) })))
 
   const setNote = (val) => setState(updateWeek(weekKey, (w) => ({ ...w, note: val })))
+
+  // События по ключу даты — чтобы показывать плашки над днями недели.
+  const eventsByDate = {}
+  for (const e of state.events) {
+    ;(eventsByDate[e.date] ||= []).push(e)
+  }
 
   return (
     <div className="grid">
@@ -86,24 +142,40 @@ export default function WeekTab({ state, setState, weekKey, onPickDate }) {
 
         <div className="card">
           <h2>📅 Календарь</h2>
-          <MiniCalendar weekKey={weekKey} onPickDate={onPickDate} events={state.events} />
+          <MiniCalendar
+            weekKey={weekKey}
+            onSelectDay={setEventDay}
+            selectedDay={eventDay}
+            events={state.events}
+          />
+          {eventDay && (
+            <EventsPanel
+              dateKey={eventDay}
+              state={state}
+              setState={setState}
+              onOpenDay={onPickDate}
+            />
+          )}
         </div>
       </div>
 
       <div className="card">
         <h2>✅ Задачи недели</h2>
-        <div className="week-grid-wrap"><div className="week-grid">
-          {days.map((date, di) => (
-            <DayTaskColumn
-              key={di}
-              date={date}
-              dayIndex={di}
-              week={week}
-              weekKey={weekKey}
-              setState={setState}
-            />
-          ))}
-        </div></div>
+        <div className="week-grid-wrap">
+          <div className="week-grid">
+            {days.map((date, di) => (
+              <DayTaskColumn
+                key={di}
+                date={date}
+                dayIndex={di}
+                week={week}
+                weekKey={weekKey}
+                setState={setState}
+                events={eventsByDate[toKey(date)] || []}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="card">
@@ -119,7 +191,7 @@ export default function WeekTab({ state, setState, weekKey, onPickDate }) {
   )
 }
 
-function DayTaskColumn({ date, dayIndex, week, weekKey, setState }) {
+function DayTaskColumn({ date, dayIndex, week, weekKey, setState, events }) {
   const [text, setText] = useState('')
   const tasks = week.tasks[dayIndex] || []
   const wkUpdate = (mut) => setState(updateWeek(weekKey, mut))
@@ -156,6 +228,11 @@ function DayTaskColumn({ date, dayIndex, week, weekKey, setState }) {
         <span>{dayNames[dayIndex]}</span>
         <span className="muted">{date.getDate()}</span>
       </h4>
+      {events.map((e) => (
+        <div className="day-event" key={e.id} title={e.name}>
+          🔖 {e.name}
+        </div>
+      ))}
       {tasks.map((t) => (
         <div key={t.id} className={`task${t.done ? ' done' : ''}`}>
           <input type="checkbox" className="checkbox" checked={t.done} onChange={() => toggle(t.id)} />

@@ -438,6 +438,72 @@ select {
   min-width: 1120px;
 }
 
+/* На телефоне дни идут сверху вниз (прокрутка вниз, а не вбок). */
+@media (max-width: 720px) {
+  .week-grid-wrap {
+    overflow-x: visible;
+  }
+  .week-grid {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+  .day-col {
+    min-height: 0;
+  }
+}
+
+/* Плашка события над днём недели. */
+.day-event {
+  background: var(--c3);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Панель событий под календарём. */
+.events-panel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--c3);
+}
+
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--c1);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+}
+
+.event-row span {
+  flex: 1;
+}
+
+.mini-cal-cell.selected {
+  background: var(--c4);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Компактный календарь на телефоне. */
+@media (max-width: 720px) {
+  .mini-cal-cell {
+    aspect-ratio: auto;
+    min-height: 34px;
+    height: 34px;
+    font-size: 0.85rem;
+  }
+}
+
 .checkbox {
   width: 18px;
   height: 18px;
