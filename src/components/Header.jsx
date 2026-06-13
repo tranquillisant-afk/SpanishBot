@@ -1,5 +1,5 @@
 import { THEMES, THEME_KEYS } from '../lib/themes'
-import { weekRangeLabel } from '../lib/dates'
+import { weekRangeLabel, daysUntil } from '../lib/dates'
 import { quoteOfDay } from '../lib/quotes'
 
 const STATUS_LABEL = {
@@ -21,6 +21,11 @@ export default function Header({
   onOpenSettings,
 }) {
   const quote = quoteOfDay(new Date())
+
+  const upcoming = (state.events || [])
+    .map((e) => ({ ...e, d: daysUntil(e.date) }))
+    .filter((e) => e.d >= 0 && e.d <= 3)
+    .sort((a, b) => a.d - b.d)
 
   return (
     <header className="header">
@@ -81,6 +86,16 @@ export default function Header({
       </div>
 
       <div className="quote">«{quote}»</div>
+
+      {upcoming.length > 0 && (
+        <div className="reminder-strip">
+          {upcoming.map((e) => (
+            <span key={e.id} className="reminder-chip">
+              🔔 {e.d === 0 ? 'Сегодня' : e.d === 1 ? 'Завтра' : `Через ${e.d} дн.`}: {e.name}
+            </span>
+          ))}
+        </div>
+      )}
     </header>
   )
 }

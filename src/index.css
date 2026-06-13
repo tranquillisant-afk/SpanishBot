@@ -8,6 +8,8 @@
   --ink: #7a2e4d;
   --accent: #e57aa3;
   --accent-soft: #ffc9dd;
+  --card-bg: #ffffff;
+  --task-bg: #ffffff;
 
   --radius: 20px;
   --radius-sm: 12px;
@@ -81,7 +83,7 @@ select {
 
 /* ---------- Cards ---------- */
 .card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 18px 20px;
@@ -138,7 +140,7 @@ select {
 
 /* ---------- Header ---------- */
 .header {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 16px 20px;
@@ -285,7 +287,7 @@ select {
 .tabbar {
   display: flex;
   gap: 6px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: var(--radius);
   padding: 6px;
   box-shadow: var(--shadow-sm);
@@ -410,7 +412,7 @@ select {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #fff;
+  background: var(--task-bg);
   border-radius: 9px;
   padding: 5px 8px;
   margin-bottom: 5px;
@@ -888,7 +890,7 @@ select {
 }
 
 .modal {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: var(--radius);
   padding: 22px;
   max-width: 520px;
@@ -925,4 +927,103 @@ select {
   gap: 6px;
   flex-wrap: wrap;
   margin-bottom: 14px;
+}
+
+/* ---------- Напоминания о событиях ---------- */
+.reminder-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.reminder-chip {
+  background: var(--c3);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ---------- Стрик привычки ---------- */
+.streak-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--c2);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ---------- Подзадачи ---------- */
+.subtask {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 28px;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.subtask.done span {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.subtask span {
+  flex: 1;
+}
+
+.subtask-add {
+  margin: 4px 0 4px 28px !important;
+  font-size: 0.8rem !important;
+  padding: 5px 8px !important;
+  width: calc(100% - 28px) !important;
+}
+
+/* ---------- Теги задач ---------- */
+.tag-btn {
+  border: none;
+  background: none;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  border-radius: 50%;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.tag-btn:hover {
+  transform: scale(1.3);
+}
+
+/* ---------- Тёмная тема — календарь ---------- */
+.mini-cal-cell.selected {
+  background: var(--c4);
+  color: var(--card-bg);
+  font-weight: 700;
+}
+
+/* ---------- Тёмная тема — таблицы ---------- */
+.tbl th {
+  background: var(--c2);
+}
+
+.tbl td.label,
+.tbl th.label {
+  background: var(--c1);
+}
+
+/* ---------- Тёмная тема — разное ---------- */
+.loading-screen {
+  color: var(--ink);
+}
+
+/* Иконка закрытия в тёмной теме */
+.icon-x:hover {
+  background: rgba(255, 100, 100, 0.2);
+  color: #e06a6a;
+  opacity: 1;
 }

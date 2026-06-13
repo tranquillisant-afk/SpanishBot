@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { weekDays, dayNames, isToday } from '../../lib/dates'
 import { getWeek } from '../../lib/defaultState'
-import { updateWeek } from '../../lib/updaters'
+import { updateWeek, habitStreak } from '../../lib/updaters'
 
 const STEP_GOAL = 8000
 const SLEEP_MIN = 7
@@ -68,15 +68,24 @@ function HabitsCard({ state, setState, weekKey }) {
             </tr>
           </thead>
           <tbody>
-            {state.habits.map((h, hi) => (
+            {state.habits.map((h, hi) => {
+              const streak = habitStreak(state, hi)
+              return (
               <tr key={hi}>
                 <td className="label">
-                  <input
-                    className="cell-input"
-                    style={{ textAlign: 'left' }}
-                    value={h}
-                    onChange={(e) => renameHabit(hi, e.target.value)}
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input
+                      className="cell-input"
+                      style={{ textAlign: 'left', flex: 1 }}
+                      value={h}
+                      onChange={(e) => renameHabit(hi, e.target.value)}
+                    />
+                    {streak > 0 && (
+                      <span className="streak-badge" title={`${streak} дн. подряд`}>
+                        🔥{streak}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 {days.map((d, di) => (
                   <td key={di} className={isToday(d) ? 'today' : ''}>
@@ -94,7 +103,7 @@ function HabitsCard({ state, setState, weekKey }) {
                   </button>
                 </td>
               </tr>
-            ))}
+            )})}
             {state.habits.length === 0 && (
               <tr>
                 <td className="empty" colSpan={9}>

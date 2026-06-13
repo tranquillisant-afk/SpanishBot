@@ -1,9 +1,23 @@
 import { emptyWeek, emptyDay } from './defaultState'
+import { weekKeyOf } from './dates'
 
 let counter = 0
 export const uid = (p = 'id') => `${p}_${Date.now().toString(36)}_${counter++}`
 
-// Возвращает updater для setState, который меняет одну неделю.
+// ---------- Теги задач ----------
+export const TASK_TAGS = [null, 'work', 'home', 'study', 'health']
+export const TAG_INFO = {
+  work:   { label: 'Работа',    color: '#5b8dee' },
+  home:   { label: 'Дом',       color: '#52b788' },
+  study:  { label: 'Учёба',     color: '#9d74d6' },
+  health: { label: 'Здоровье',  color: '#f48fb1' },
+}
+export function nextTag(current) {
+  const idx = TASK_TAGS.indexOf(current ?? null)
+  return TASK_TAGS[(idx + 1) % TASK_TAGS.length]
+}
+
+// ---------- Updaters ----------
 export function updateWeek(weekKey, mutator) {
   return (s) => {
     const week = { ...emptyWeek(), ...(s.weeks[weekKey] || {}) }
@@ -12,7 +26,6 @@ export function updateWeek(weekKey, mutator) {
   }
 }
 
-// Возвращает updater для setState, который меняет один день.
 export function updateDay(dateKey, mutator) {
   return (s) => {
     const day = { ...emptyDay(), ...(s.days[dateKey] || {}) }
@@ -21,7 +34,7 @@ export function updateDay(dateKey, mutator) {
   }
 }
 
-// Подсчёт выполнения недели (доля 0..1).
+// ---------- Статистика ----------
 export function weekTaskStats(week) {
   let total = 0
   let done = 0
@@ -50,4 +63,28 @@ export function weekStepsStats(week, goal = 8000) {
   const daysHit = vals.filter((v) => v >= goal).length
   const avg = vals.length ? sum / 7 : 0
   return { sum, avg, daysHit, ratio: Math.min(1, avg / goal) }
+}
+
+// ---------- Стрик привычки ----------
+// Считает подряд идущие дни (включая сегодня, если отмечено).
+export function habitStreak(state, habitIndex) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const todayWk = weekKeyOf(today)
+  const todayDow = (today.getDay() + 6) % 7
+  const todayChecked = !!state.weeks[todayWk]?.hchecks?.[`${habitIndex}_${todayDow}`]
+
+  let streak = todayChecked ? 1 : 0
+
+  for (let offset = 1; offset < 366; offset++) {
+    const d = new Date(today)
+    d.setDate(today.getDate() - offset)
+    const wk = weekKeyOf(d)
+    const dow = (d.getDay() + 6) % 7
+    if (!state.weeks[wk]?.hchecks?.[`${habitIndex}_${dow}`]) break
+    streak++
+  }
+
+  return streak
 }
