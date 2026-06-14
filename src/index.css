@@ -1027,3 +1027,87 @@ select {
   color: #e06a6a;
   opacity: 1;
 }
+
+/* ---------- 2-рядная раскладка задач ---------- */
+.week-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.notes-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.notes-col .textarea {
+  flex: 1;
+  min-height: 80px;
+  resize: none;
+}
+
+.day-col.drag-over {
+  outline: 2px dashed var(--c5);
+  background: var(--c2);
+}
+
+@media (max-width: 720px) {
+  .week-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Легенда тегов ---------- */
+.tag-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+}
+
+.tag-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ---------- Прогресс подзадач ---------- */
+.subtask-progress {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--c2);
+  border-radius: 999px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+  color: var(--ink);
+}
+
+/* ---------- Выбор дней для повторяющихся задач ---------- */
+.day-picker {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.day-pick-btn {
+  border: 1.5px solid var(--c3);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.day-pick-btn.active {
+  background: var(--c4);
+  border-color: var(--c4);
+  color: var(--card-bg);
+}
+
+.day-pick-btn:hover {
+  background: var(--c2);
+}

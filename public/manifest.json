@@ -1,0 +1,13 @@
+{
+  "name": "Недельный планер",
+  "short_name": "Планер",
+  "description": "Личный планер с синхронизацией",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff5f8",
+  "theme_color": "#e57aa3",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any maskable" }
+  ]
+}

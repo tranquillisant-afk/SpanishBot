@@ -7,10 +7,10 @@ export const uid = (p = 'id') => `${p}_${Date.now().toString(36)}_${counter++}`
 // ---------- Теги задач ----------
 export const TASK_TAGS = [null, 'work', 'home', 'study', 'health']
 export const TAG_INFO = {
-  work:   { label: 'Работа',    color: '#5b8dee' },
-  home:   { label: 'Дом',       color: '#52b788' },
-  study:  { label: 'Учёба',     color: '#9d74d6' },
-  health: { label: 'Здоровье',  color: '#f48fb1' },
+  work:   { label: 'Работа',   color: '#5b8dee' },
+  home:   { label: 'Дом',      color: '#52b788' },
+  study:  { label: 'Учёба',    color: '#9d74d6' },
+  health: { label: 'Здоровье', color: '#f48fb1' },
 }
 export function nextTag(current) {
   const idx = TASK_TAGS.indexOf(current ?? null)
@@ -36,8 +36,7 @@ export function updateDay(dateKey, mutator) {
 
 // ---------- Статистика ----------
 export function weekTaskStats(week) {
-  let total = 0
-  let done = 0
+  let total = 0, done = 0
   for (let d = 0; d < 7; d++) {
     const list = week.tasks?.[d] || []
     total += list.length
@@ -47,13 +46,10 @@ export function weekTaskStats(week) {
 }
 
 export function weekHabitStats(week, habits) {
-  let total = habits.length * 7
-  let done = 0
-  for (let hi = 0; hi < habits.length; hi++) {
-    for (let di = 0; di < 7; di++) {
+  let total = habits.length * 7, done = 0
+  for (let hi = 0; hi < habits.length; hi++)
+    for (let di = 0; di < 7; di++)
       if (week.hchecks?.[`${hi}_${di}`]) done++
-    }
-  }
   return { total, done, ratio: total ? done / total : 0 }
 }
 
@@ -66,17 +62,13 @@ export function weekStepsStats(week, goal = 8000) {
 }
 
 // ---------- Стрик привычки ----------
-// Считает подряд идущие дни (включая сегодня, если отмечено).
 export function habitStreak(state, habitIndex) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-
   const todayWk = weekKeyOf(today)
   const todayDow = (today.getDay() + 6) % 7
   const todayChecked = !!state.weeks[todayWk]?.hchecks?.[`${habitIndex}_${todayDow}`]
-
   let streak = todayChecked ? 1 : 0
-
   for (let offset = 1; offset < 366; offset++) {
     const d = new Date(today)
     d.setDate(today.getDate() - offset)
@@ -85,6 +77,31 @@ export function habitStreak(state, habitIndex) {
     if (!state.weeks[wk]?.hchecks?.[`${habitIndex}_${dow}`]) break
     streak++
   }
-
   return streak
+}
+
+// ---------- Автодобавление повторяющихся задач ----------
+export function autoFillRecurring(state, weekKey) {
+  const templates = state.recurringTasks || []
+  if (!templates.length) return null
+  const week = { ...emptyWeek(), ...(state.weeks[weekKey] || {}) }
+  let tasks = { ...week.tasks }
+  let changed = false
+  for (const tmpl of templates) {
+    for (const dayIdx of tmpl.days || []) {
+      const dayTasks = tasks[dayIdx] || []
+      if (!dayTasks.some((t) => t.recurringId === tmpl.id)) {
+        tasks = {
+          ...tasks,
+          [dayIdx]: [
+            ...dayTasks,
+            { id: uid('rt'), recurringId: tmpl.id, text: tmpl.text, tag: tmpl.tag || null, done: false, subtasks: [] },
+          ],
+        }
+        changed = true
+      }
+    }
+  }
+  if (!changed) return null
+  return { ...state, weeks: { ...state.weeks, [weekKey]: { ...week, tasks } } }
 }
