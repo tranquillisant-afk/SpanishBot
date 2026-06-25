@@ -13,7 +13,14 @@ export function defaultState() {
     days: {},
     recurringTasks: [], // [{id, text, tag, days:[0..6]}]
     monthlyGoals: [],   // [{id, text, current:0, target:10, unit:'шт.'}]
+    hourlySchedule: emptySchedule(), // почасовое расписание (общее для всех недель)
   }
+}
+
+// Почасовое расписание: 3 группы дней, у каждой — список блоков
+// {id, time, title, sub, color}. Не зависит от конкретной недели.
+export function emptySchedule() {
+  return { mwf: [], tt: [], weekend: [] }
 }
 
 export function normalizeState(raw) {
@@ -31,6 +38,7 @@ export function normalizeState(raw) {
     days: raw.days && typeof raw.days === 'object' ? raw.days : {},
     recurringTasks: Array.isArray(raw.recurringTasks) ? raw.recurringTasks : [],
     monthlyGoals: Array.isArray(raw.monthlyGoals) ? raw.monthlyGoals : [],
+    hourlySchedule: { ...emptySchedule(), ...(raw.hourlySchedule && typeof raw.hourlySchedule === 'object' ? raw.hourlySchedule : {}) },
   }
 }
 

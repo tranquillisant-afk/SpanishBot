@@ -9,6 +9,7 @@ import Header from './components/Header'
 import WishList from './components/WishList'
 import Settings from './components/Settings'
 import WeekTab from './components/tabs/WeekTab'
+import ScheduleTab from './components/tabs/ScheduleTab'
 import TrackersTab from './components/tabs/TrackersTab'
 import FocusTab from './components/tabs/FocusTab'
 import DayTab from './components/tabs/DayTab'
@@ -17,6 +18,7 @@ import ArchiveTab from './components/tabs/ArchiveTab'
 
 const TABS = [
   { key: 'week',     label: 'Неделя',      emoji: '🗓️' },
+  { key: 'schedule', label: 'Расписание',  emoji: '⏰' },
   { key: 'trackers', label: 'Трекеры',     emoji: '📈' },
   { key: 'focus',    label: 'Фокус',       emoji: '🍅' },
   { key: 'day',      label: 'День',        emoji: '☀️' },
@@ -82,6 +84,7 @@ export default function App() {
       </nav>
 
       {tab === 'week'     && <WeekTab state={state} setState={setState} weekKey={weekKey} onPickDate={pickDate} />}
+      {tab === 'schedule' && <ScheduleTab state={state} setState={setState} />}
       {tab === 'trackers' && <TrackersTab state={state} setState={setState} weekKey={weekKey} />}
       {tab === 'focus'    && <FocusTab state={state} setState={setState} />}
       {tab === 'day'      && <DayTab state={state} setState={setState} weekKey={weekKey} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />}
