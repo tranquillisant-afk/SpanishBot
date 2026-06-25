@@ -5,7 +5,8 @@ import { uid } from '../../lib/updaters'
 const GROUPS = [
   { key: 'mwf', label: 'Пн / Ср / Пт', dows: [0, 2, 4] },
   { key: 'tt', label: 'Вт / Чт', dows: [1, 3] },
-  { key: 'weekend', label: 'Выходные', dows: [5, 6] },
+  { key: 'sat', label: 'Суббота', dows: [5] },
+  { key: 'sun', label: 'Воскресенье', dows: [6] },
 ]
 
 // Цветовые типы блоков (фиксированные, не зависят от темы).
