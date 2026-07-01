@@ -1,13 +1,10 @@
 import { useState } from 'react'
+import { dayNames } from '../../lib/dates'
+import { SCHEDULE_DAYS } from '../../lib/defaultState'
 import { uid } from '../../lib/updaters'
 
-// Группы дней. dows — индексы дня недели (0 = Пн … 6 = Вс).
-const GROUPS = [
-  { key: 'mwf', label: 'Пн / Ср / Пт', dows: [0, 2, 4] },
-  { key: 'tt', label: 'Вт / Чт', dows: [1, 3] },
-  { key: 'sat', label: 'Суббота', dows: [5] },
-  { key: 'sun', label: 'Воскресенье', dows: [6] },
-]
+// Дни недели в порядке Пн…Вс, ключи совпадают с hourlySchedule.
+const DAYS = SCHEDULE_DAYS.map((key, i) => ({ key, label: dayNames[i] }))
 
 // Цветовые типы блоков (фиксированные, не зависят от темы).
 const BLOCK_COLORS = [
@@ -29,15 +26,51 @@ function timeVal(t) {
   return Number(m[1]) * 60 + (Number(m[2]) || 0)
 }
 
-function todayGroupKey() {
+function todayDayKey() {
   const dow = (new Date().getDay() + 6) % 7
-  return GROUPS.find((g) => g.dows.includes(dow))?.key || 'mwf'
+  return DAYS[dow].key
+}
+
+// ---------- Копирование расписания на другие дни ----------
+function CopyToPanel({ active, onCopy }) {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState([])
+  const others = DAYS.filter((d) => d.key !== active)
+
+  const toggle = (key) => setSelected((prev) => prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key])
+  const confirm = () => {
+    if (!selected.length) return
+    onCopy(selected)
+    setSelected([])
+    setOpen(false)
+  }
+
+  if (!open) {
+    return <button className="btn sm" onClick={() => setOpen(true)}>📋 Скопировать это расписание в…</button>
+  }
+
+  return (
+    <div className="sched-copy-panel">
+      <div className="muted" style={{ marginBottom: 6 }}>Скопировать расписание «{DAYS.find((d) => d.key === active).label}» в:</div>
+      <div className="day-picker">
+        {others.map((d) => (
+          <button key={d.key} className={`day-pick-btn${selected.includes(d.key) ? ' active' : ''}`} onClick={() => toggle(d.key)}>
+            {d.label}
+          </button>
+        ))}
+      </div>
+      <div className="row" style={{ marginTop: 10 }}>
+        <button className="btn primary sm" onClick={confirm} disabled={!selected.length}>Скопировать</button>
+        <button className="btn sm ghost" onClick={() => { setOpen(false); setSelected([]) }}>Отмена</button>
+      </div>
+    </div>
+  )
 }
 
 export default function ScheduleTab({ state, setState }) {
-  // При каждом открытии вкладки активна группа, к которой относится сегодняшний день.
-  const [active, setActive] = useState(todayGroupKey())
-  const todayKey = todayGroupKey()
+  // При каждом открытии вкладки активен день, соответствующий сегодняшнему.
+  const [active, setActive] = useState(todayDayKey())
+  const todayKey = todayDayKey()
 
   const blocks = state.hourlySchedule?.[active] || []
 
@@ -56,29 +89,38 @@ export default function ScheduleTab({ state, setState }) {
   }))
   const sortByTime = () => setBlocks((b) => [...b].sort((a, c) => timeVal(a.time) - timeVal(c.time)))
 
+  const copyTo = (targetKeys) => setState((s) => {
+    const source = s.hourlySchedule?.[active] || []
+    const next = { ...s.hourlySchedule }
+    for (const key of targetKeys) {
+      next[key] = source.map((blk, i) => ({ ...blk, id: uid(`sb_${key}${i}`) }))
+    }
+    return { ...s, hourlySchedule: next }
+  })
+
   return (
     <div className="grid">
       <div className="card">
         <h2>⏰ Расписание по часам</h2>
         <p className="muted" style={{ marginTop: -6, marginBottom: 14 }}>
-          Общий распорядок дня — один на все недели. Активный день меняется автоматически на сегодняшний.
+          Своё расписание на каждый день недели. Активный день меняется автоматически на сегодняшний.
           Кружок слева от ✕ меняет тип блока.
         </p>
 
         <div className="sched-tabs">
-          {GROUPS.map((g) => (
+          {DAYS.map((d) => (
             <button
-              key={g.key}
-              className={`sched-tab${active === g.key ? ' active' : ''}`}
-              onClick={() => setActive(g.key)}
+              key={d.key}
+              className={`sched-tab${active === d.key ? ' active' : ''}`}
+              onClick={() => setActive(d.key)}
             >
-              {g.label}{g.key === todayKey && <span className="sched-today-dot" title="Сегодня">●</span>}
+              {d.label}{d.key === todayKey && <span className="sched-today-dot" title="Сегодня">●</span>}
             </button>
           ))}
         </div>
 
         {blocks.length === 0 && (
-          <div className="empty">Пусто. Добавьте блоки своего распорядка дня для «{GROUPS.find((g) => g.key === active).label}».</div>
+          <div className="empty">Пусто. Добавьте блоки распорядка дня для «{DAYS.find((d) => d.key === active).label}» или скопируйте с другого дня.</div>
         )}
 
         <div className="timeline">
@@ -131,6 +173,12 @@ export default function ScheduleTab({ state, setState }) {
           <button className="btn primary" onClick={add}>+ Добавить блок</button>
           {blocks.length > 1 && <button className="btn sm" onClick={sortByTime}>↕ По времени</button>}
         </div>
+
+        {blocks.length > 0 && (
+          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--c3)' }}>
+            <CopyToPanel active={active} onCopy={copyTo} />
+          </div>
+        )}
       </div>
 
       <div className="card soft">
