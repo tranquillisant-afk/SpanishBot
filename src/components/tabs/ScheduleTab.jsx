@@ -67,6 +67,23 @@ function CopyToPanel({ active, onCopy }) {
   )
 }
 
+// ---------- Очистка расписания дня ----------
+function ClearButton({ onClear }) {
+  const [confirming, setConfirming] = useState(false)
+
+  if (!confirming) {
+    return <button className="btn sm danger" onClick={() => setConfirming(true)}>🗑 Очистить расписание</button>
+  }
+
+  return (
+    <span className="row" style={{ gap: 6 }}>
+      <span className="muted">Точно удалить все блоки этого дня?</span>
+      <button className="btn sm danger" onClick={() => { onClear(); setConfirming(false) }}>Да, очистить</button>
+      <button className="btn sm ghost" onClick={() => setConfirming(false)}>Отмена</button>
+    </span>
+  )
+}
+
 export default function ScheduleTab({ state, setState }) {
   // При каждом открытии вкладки активен день, соответствующий сегодняшнему.
   const [active, setActive] = useState(todayDayKey())
@@ -88,6 +105,7 @@ export default function ScheduleTab({ state, setState }) {
     return { ...x, color: BLOCK_COLORS[(idx + 1) % BLOCK_COLORS.length].key }
   }))
   const sortByTime = () => setBlocks((b) => [...b].sort((a, c) => timeVal(a.time) - timeVal(c.time)))
+  const clear = () => setBlocks(() => [])
 
   const copyTo = (targetKeys) => setState((s) => {
     const source = s.hourlySchedule?.[active] || []
@@ -172,6 +190,7 @@ export default function ScheduleTab({ state, setState }) {
         <div className="row" style={{ marginTop: 12 }}>
           <button className="btn primary" onClick={add}>+ Добавить блок</button>
           {blocks.length > 1 && <button className="btn sm" onClick={sortByTime}>↕ По времени</button>}
+          {blocks.length > 0 && <ClearButton onClear={clear} />}
         </div>
 
         {blocks.length > 0 && (
